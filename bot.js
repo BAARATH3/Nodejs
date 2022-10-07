@@ -244,7 +244,7 @@ bot.on("contact", async (ctx) => {
       })
       return
     }
-    if (cont.startsWith("91")) {
+    if (cont.startsWith("+91")) {
       db.collection('allUsers').updateOne({
         userID: ctx.from.id
       }, {
