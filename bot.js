@@ -38,6 +38,8 @@ const refer = new BaseScene('refer')
 stage.register(refer)
 const mini = new BaseScene('mini')
 stage.register(mini)
+const mini = new BaseScene('maxi')
+stage.register(maxi)
 const chnl = new BaseScene('chnl')
 stage.register(chnl)
 const removechnl = new BaseScene('removechnl')
@@ -107,6 +109,7 @@ bot.hears(/^\/start (.+[1-9]$)/, async (ctx) => {
         paychannel: 'R',
         bonus: 0.1,
         minimum: 1,
+        maximum: 2,
         botstat: 'Active',
         withstat: 'ON',
         subwallet: 'NOT SET',
@@ -184,6 +187,7 @@ bot.start(async (ctx) => {
         paychannel: 'NOT SET',
         bonus: 0.1,
         minimum: 1,
+        maximum: 2,
         botstat: 'Active',
         withstat: 'ON',
         subwallet: 'NOT SET',
@@ -244,7 +248,7 @@ bot.on("contact", async (ctx) => {
       })
       return
     }
-    if (cont.startsWith("+91")) {
+    if (cont.startsWith("91") || cont.startsWith("+91")) {
       db.collection('allUsers').updateOne({
         userID: ctx.from.id
       }, {
@@ -756,7 +760,7 @@ bot.hears('📊 Statistics', async (ctx) => {
             value: 0
           })
           ctx.reply(
-            '<b>📊 Bot Live Statistics 📊\n\n✨Total Payouts : 0 ' + currency + '\n\n🎀Total Users: ' + members.length + ' Users</b>', {
+            '<b>📊 Bot Live Statistics 📊\n\n📤 Total Payouts : 0 ' + currency + '\n\n💡 Total Users: ' + members.length + ' Users\n\n🤟 Bot Maker : <a href="https://t.me/Roney_Coder">Piro Roney🔥</a></b>', {
               parse_mode: 'html',
               reply_markup: {
                 keyboard: [
@@ -772,7 +776,7 @@ bot.hears('📊 Statistics', async (ctx) => {
           let payout = statdata[0].value * 1
           let memb = parseInt(members.length)
           ctx.reply(
-            '<b>📊 Bot Live Statistics 📊\n\n✨Total Payouts : ' + payout + ' ' + currency + '\n\n🎀Total Users: ' + memb + ' Users</b>', {
+            '<b>📊 Bot Live Statistics 📊\n\n📤 Total Payouts : ' + payout + ' ' + currency + '\n\n💡 Total Users: ' + memb + ' Users\n\n🤟 Bot Maker : <a href="https://t.me/Roney_Coder">Piro Roney🔥</a></b>', {
               parse_mode: 'html',
               reply_markup: {
                 keyboard: [
@@ -810,6 +814,7 @@ bot.hears('/panel', async (ctx) => {
     let paychannel = admin[0].paychannel
     let bonusamount = admin[0].bonus
     let mini_with = admin[0].minimum
+    let max_with = admin[0].maximum
     let refer = admin[0].ref
     let stat = admin[0].botstat
     let withst = admin[0].withstat
@@ -843,6 +848,10 @@ bot.hears('/panel', async (ctx) => {
               }, {
                 text: "💰 Change Minimum",
                 callback_data: "minimum"
+              }],
+              [{
+              	text: "🤍 Change Maximum",
+                  callback_data: "maximum"
               }],
               [{
                 text: "🤖 Bot : " + botstt + "",
@@ -1085,6 +1094,7 @@ onWithdraw.on('text', async (ctx) => {
       admin: "admin"
     }).toArray()
     let mini_with = admin[0].minimum
+    let max_with = admin[0].maximum
     let currency = admin[0].cur
     let pay = admin[0].paychannel
     let bots = admin[0].withstat
@@ -1193,10 +1203,10 @@ onWithdraw.on('text', async (ctx) => {
           )
           ctx.scene.leave('onWithdraw')
           return 0;
-        } else if (ctx.message.text > 10000) {
+        } else if (ctx.message.text > max_with) {
           ctx.replyWithMarkdown(
 
-            '*⚠️ Maximum Withdrawal Is 10000 ' + currency + '*', {
+            '*⚠️ Maximum Withdrawal Is ' + max_with +' ' + currency + '*', {
               reply_markup: {
                 keyboard: [
                   ['💰 Balance'],
@@ -1471,6 +1481,50 @@ mini.hears(/^[+-]?([0-9]*[.])?[0-9]+/i, async (ctx) => {
       )
     }
     ctx.scene.leave('mini')
+  } catch (error) {
+    console.log(error)
+  }
+})
+maxi.hears(/^[+-]?([0-9]*[.])?[0-9]+/i, async (ctx) => {
+  try {
+    if (ctx.message.text == '⛔ Cancel') {
+      ctx.replyWithMarkdown(
+        '*🏡 Welcome To Main Menu*', {
+          reply_markup: {
+            keyboard: [
+              ['💰 Balance'],
+              ['🙌🏻 Invite', '🎁 Bonus', '🗂 Wallet'],
+              ['💳 Withdraw', '📊 Statistics']
+            ],
+            resize_keyboard: true
+          }
+        }
+      )
+    } else {
+      let final = ctx.message.text * 1
+      db.collection('admindb').updateOne({
+        admin: "admin"
+      }, {
+        $set: {
+          maximum: final
+        }
+      }, {
+        upsert: true
+      })
+      ctx.replyWithMarkdown(
+        '*🗂New Maximum Withdraw Set To: *\n`' + ctx.message.text + '`', {
+          reply_markup: {
+            keyboard: [
+              ['💰 Balance'],
+              ['🙌🏻 Invite', '🎁 Bonus', '🗂 Wallet'],
+              ['💳 Withdraw', '📊 Statistics']
+            ],
+            resize_keyboard: true
+          }
+        }
+      )
+    }
+    ctx.scene.leave('maxi')
   } catch (error) {
     console.log(error)
   }
@@ -2021,6 +2075,7 @@ bot.action('botstat', async (ctx) => {
     let paychannel = admin[0].paychannel
     let bonusamount = admin[0].bonus
     let mini_with = admin[0].minimum
+    let max_with = admin[0].maximum
     let refer = admin[0].ref
     let stat = admin[0].botstat
     let withst = admin[0].withstat
@@ -2078,6 +2133,10 @@ bot.action('botstat', async (ctx) => {
               callback_data: "minimum"
             }],
             [{
+              text: "🤍 Change Maximum",
+              callback_data: "maximum"
+            }],
+            [{
               text: "🤖 Bot : " + botstt + "",
               callback_data: "botstat"
             }],
@@ -2120,6 +2179,7 @@ bot.action('withstat', async (ctx) => {
     let paychannel = admin[0].paychannel
     let bonusamount = admin[0].bonus
     let mini_with = admin[0].minimum
+    let max_with = admin[0].maximum
     let refer = admin[0].ref
     let stat = admin[0].botstat
     let withst = admin[0].withstat
@@ -2175,6 +2235,10 @@ bot.action('withstat', async (ctx) => {
             }, {
               text: "💰 Change Minimum",
               callback_data: "minimum"
+            }],
+            [{
+              text: "🤍 Change Maximum",
+              callback_data: "maximum"
             }],
             [{
               text: "🤖 Bot : " + botstt + "",
@@ -2244,6 +2308,25 @@ bot.action('minimum', async (ctx) => {
       }
     )
     ctx.scene.enter('mini')
+  } catch (error) {
+    console.log(error)
+  }
+})
+bot.action('maximum', async (ctx) => {
+  try {
+    ctx.deleteMessage()
+    ctx.reply(
+      '*💡 Enter New Maximum Withdraw Amount*', {
+        parse_mode: 'markdown',
+        reply_markup: {
+          keyboard: [
+            ['⛔ Cancel']
+          ],
+          resize_keyboard: true
+        }
+      }
+    )
+    ctx.scene.enter('maxi')
   } catch (error) {
     console.log(error)
   }
